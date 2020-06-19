@@ -2,6 +2,7 @@ use proc_macro2::{Delimiter, Span, TokenStream, TokenTree};
 use proc_macro_error::emit_error;
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream, Result};
+use syn::spanned::Spanned;
 
 // GIANT HACK until the span start/end methods are available in stable
 fn span_pos(s: &Span) -> (usize, usize) {
@@ -25,6 +26,7 @@ enum Format {
     Raw,
     Quote,
     Bytes,
+    Child,
 }
 
 impl Parse for Format {
@@ -36,6 +38,7 @@ impl Parse for Format {
             match ms.as_str() {
                 "q" => Ok(Self::Quote),
                 "b" => Ok(Self::Bytes),
+                "c" => Ok(Self::Child),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
                     Ok(Self::Raw)
@@ -50,6 +53,22 @@ impl Parse for Format {
 struct Braced {
     format: Format,
     expr: syn::Expr,
+}
+
+fn child_call(expr: &syn::Expr) -> TokenStream {
+    match expr {
+        syn::Expr::Call(c) => {
+            let mut c = c.clone();
+            // let arg: syn::Expr = syn::parse_quote!(&mut w);
+            let arg: syn::Expr = syn::parse_quote!(w);
+            c.args.insert(0, arg);
+            quote!(#c?;)
+        }
+        _ => {
+            emit_error!(expr.span(), "expected call expression here");
+            quote!()
+        }
+    }
 }
 
 impl Parse for Braced {
@@ -68,6 +87,7 @@ impl ToTokens for Braced {
             Format::Raw => quote! { write!(w, "{}", #b)?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
             Format::Bytes => quote! { w.write(#b)?; },
+            Format::Child => child_call(b),
         };
         ts.to_tokens(tokens);
     }

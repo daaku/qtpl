@@ -13,6 +13,7 @@ literal text, or `write!` when using dynamic content.
 TODO
 ====
 
+- [ ] Document pattern for passing children to tplfn
 - [ ] Support more formatting directives
 - [ ] Support methods in addition to functions in `tplfn`
 - [ ] Support returning errors (ideally unopinionated)
@@ -21,5 +22,4 @@ TODO
 - [ ] Add documentation
 - [ ] Monitor test coverage in GitHub actions?
 - [ ] Switch to `write_all` and test for it
-- [ ] Document pattern for passing children to tplfn
 - [ ] Document gotchas around whitespace

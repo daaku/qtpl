@@ -64,8 +64,43 @@ fn format_bytes() {
         tpl! { <a>Hello, {!b name}!</a> }
     }
 
+    assert_eq!(html!(hello(b"world")).unwrap(), b"<a>Hello, world!</a>");
+}
+
+#[test]
+fn child_elements() {
+    #[tplfn]
+    fn page(body: &[u8], footer: &[u8]) {
+        tpl! {
+            <body>{!b body}</body>
+            <footer>{!b footer}</footer>
+        }
+    }
+
+    #[tplfn]
+    fn body(name: String) {
+        tpl! {Hello, {&name}!}
+    }
+
+    #[tplfn]
+    fn footer(company: &str) {
+        tpl! {Copyright {company}}
+    }
+
+    #[tplfn]
+    fn home(name: String, company: &str) {
+        let b = html!(body(name))?;
+        let f = html!(footer(company))?;
+        tpl! {
+            {!c page(&b, &f)}
+        }
+    }
+
+    let name = String::from("world");
+    let company = "bigcorp";
+    let result = String::from_utf8(html!(home(name, company)).unwrap()).unwrap();
     assert_eq!(
-        html!(hello(b"world")).unwrap(),
-        b"<a>Hello, world!</a>"
+        result,
+        "<body>Hello, world!</body> <footer>Copyright bigcorp</footer>"
     );
 }
