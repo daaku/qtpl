@@ -1,0 +1,23 @@
+[package]
+name = "qtpl"
+version = "0.1.0"
+authors = ["Naitik Shah <n@daaku.org>"]
+edition = "2018"
+description = "Templates inside your Rust code."
+readme = "../readme.md"
+repository = "https://github.com/daaku/qtpl"
+keywords = ["macro", "template"]
+categories = []
+license = "MIT"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro-error = "1.0"
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "1.0", features = ["full"] }
+
+[dev-dependencies]
+pretty_assertions = "0.6"

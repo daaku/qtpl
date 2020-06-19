@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "qtpl",
+  "qtpl_tests",
+]
