@@ -24,6 +24,7 @@ fn literal_bytes(s: &str) -> TokenStream {
 enum Format {
     Raw,
     Quote,
+    Bytes,
 }
 
 impl Parse for Format {
@@ -34,6 +35,7 @@ impl Parse for Format {
             let ms = modifier.to_string();
             match ms.as_str() {
                 "q" => Ok(Self::Quote),
+                "b" => Ok(Self::Bytes),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
                     Ok(Self::Raw)
@@ -65,6 +67,7 @@ impl ToTokens for Braced {
         let ts = match self.format {
             Format::Raw => quote! { write!(w, "{}", #b)?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
+            Format::Bytes => quote! { w.write(#b)?; },
         };
         ts.to_tokens(tokens);
     }

@@ -56,3 +56,16 @@ fn attrs() {
         b"<a class=\"world\">Hello!</a>"
     );
 }
+
+#[test]
+fn format_bytes() {
+    #[tplfn]
+    fn hello(name: &[u8]) {
+        tpl! { <a>Hello, {!b name}!</a> }
+    }
+
+    assert_eq!(
+        html!(hello(b"world")).unwrap(),
+        b"<a>Hello, world!</a>"
+    );
+}
