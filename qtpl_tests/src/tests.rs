@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{html, tpl, tplfn};
+use qtpl::{child, html, tpl, tplfn};
 
 #[test]
 fn plain_text() {
@@ -70,10 +70,14 @@ fn format_bytes() {
 #[test]
 fn child_elements() {
     #[tplfn]
-    fn page(body: &[u8], footer: &[u8]) {
+    fn page<B, F>(body: B, footer: F)
+    where
+        B: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
+        F: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
+    {
         tpl! {
-            <body>{!b body}</body>
-            <footer>{!b footer}</footer>
+            <body>{!c body()}</body>
+            <footer>{!c footer()}</footer>
         }
     }
 
@@ -89,10 +93,10 @@ fn child_elements() {
 
     #[tplfn]
     fn home(name: String, company: &str) {
-        let b = html!(body(name))?;
-        let f = html!(footer(company))?;
+        let b = child!(body(name));
+        let f = child!(footer(company));
         tpl! {
-            {!c page(&b, &f)}
+            {!c page(b, f)}
         }
     }
 
