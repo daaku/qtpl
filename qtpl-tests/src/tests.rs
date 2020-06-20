@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{child, render, tpl, tplfn, Render};
+use qtpl::{child, render, tpl, tplfn};
 
 #[test]
 fn plain_text() {
@@ -68,12 +68,17 @@ fn format_bytes() {
 }
 
 #[test]
-fn child_elements() {
+fn readme_example() {
+    use qtpl::{child, render, tpl, tplfn, Render};
+
     #[tplfn]
     fn page<B: Render, F: Render>(body: B, footer: F) {
         tpl! {
-            <body>{!c body}</body>
-            <footer>{!c footer}</footer>
+            <!doctype html>
+            <body>
+                {!c body}
+                <footer>{!c footer}</footer>
+            </body>
         }
     }
 
@@ -98,9 +103,16 @@ fn child_elements() {
 
     let name = String::from("world");
     let company = "bigcorp";
-    let result = String::from_utf8(render!(home(name, company)).unwrap()).unwrap();
+    let out = render!(home(name, company)).unwrap();
+
     assert_eq!(
-        result,
-        "<body>Hello, world!</body> <footer>Copyright bigcorp</footer>"
+        String::from_utf8(out).unwrap(),
+        concat!(
+            "<!doctype html> ",
+            "<body> ",
+            "Hello, world! ",
+            "<footer>Copyright bigcorp</footer> ",
+            "</body>",
+        )
     );
 }
