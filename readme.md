@@ -1,9 +1,9 @@
 qtpl
 ====
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fdaaku%2Fqtpl%2Fbadge%3Fref%3Dmaster)](https://actions-badge.atrox.dev/daaku/qtpl/goto?ref=master)
-![Crates.io](https://img.shields.io/crates/v/qtpl)
-![Documentation](https://docs.rs/qtpl/badge.svg)
+[![Rust](https://github.com/daaku/qtpl/workflows/Rust/badge.svg)](https://github.com/daaku/qtpl/actions?query=workflow%3ARust)
+[![Crates.io](https://img.shields.io/crates/v/qtpl)](https://crates.io/crates/qtpl)
+[![Documentation](https://docs.rs/qtpl/badge.svg)](https://docs.rs/qtpl)
 
 Templates in your Rust code.
 
@@ -13,7 +13,7 @@ This library allows you to write templates, using macros, mixed in with your
 Rust code. This allows you to use normal Rust code for the logic, and embed
 template code along side it.
 
-See the (documentation)[https://docs.rs/qtpl] for how to use this library.
+See the [documentation](https://docs.rs/qtpl) for how to use this library.
 Here's a taste of how it looks:
 
 ```rust
