@@ -95,7 +95,7 @@ impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let b = &self.expr;
         let ts = match self.format {
-            Format::Default => quote! { write!(w, "{}", ::v_htmlescape::escape(#b))?; },
+            Format::Default => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
             Format::Bytes => quote! { w.write_all(#b)?; },
             Format::TplFn => tplfn_call(b),

@@ -105,17 +105,29 @@ dependencies = [
 
 [[package]]
 name = "qtpl"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
- "qtpl-macros",
+ "qtpl-macros 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "v_htmlescape",
 ]
 
 [[package]]
 name = "qtpl-macros"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "pretty_assertions",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "qtpl-macros"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ab66d2d08e263cabfc33183082e3a4e5de3ce13cb183a27fcbeaaf7243dd4c2"
+dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",

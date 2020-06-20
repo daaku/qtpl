@@ -103,10 +103,9 @@
 //! # Ok::<(), std::io::Error>(())
 //! ```
 
-extern crate v_htmlescape;
-
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
+pub use v_htmlescape::escape;
 
 pub trait Render {
     fn render(self, destination: &mut dyn Write) -> Result<()>;
