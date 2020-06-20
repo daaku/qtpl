@@ -2,5 +2,6 @@
 
 members = [
   "qtpl",
-  "qtpl_tests",
+  "qtpl-macros",
+  "qtpl-tests",
 ]
