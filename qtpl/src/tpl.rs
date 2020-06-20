@@ -60,7 +60,7 @@ struct Braced {
 fn child_call(expr: &syn::Expr) -> TokenStream {
     match expr {
         syn::Expr::Path(p) => {
-            quote!(#p(w)?;)
+            quote!(#p.render(w)?;)
         },
         _ => {
             emit_error!(expr.span(), "expected an identifier here");

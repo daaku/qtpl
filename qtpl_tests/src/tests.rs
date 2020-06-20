@@ -69,12 +69,21 @@ fn format_bytes() {
 
 #[test]
 fn child_elements() {
-    #[tplfn]
-    fn page<B, F>(body: B, footer: F)
+    trait Render {
+        fn render(self, destination: &mut dyn ::std::io::Write) -> ::std::io::Result<()>;
+    }
+
+    impl<F> Render for F
     where
-        B: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
         F: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
     {
+        fn render(self, destination: &mut dyn ::std::io::Write) -> ::std::io::Result<()> {
+            self(destination)
+        }
+    }
+
+    #[tplfn]
+    fn page<B: Render, F: Render>(body: B, footer: F) {
         tpl! {
             <body>{!c body}</body>
             <footer>{!c footer}</footer>
