@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{child, render_bytes, tpl, tplfn};
+use qtpl::{child, render_string, tpl, tplfn};
 
 #[test]
 fn plain_text() {
@@ -8,7 +8,7 @@ fn plain_text() {
         tpl! { <a>Hello, world!</a> }
     }
 
-    assert_eq!(render_bytes!(hello()).unwrap(), b"<a>Hello, world!</a>");
+    assert_eq!(render_string!(hello()), "<a>Hello, world!</a>");
 }
 
 #[test]
@@ -18,10 +18,7 @@ fn block_with_expr() {
         tpl! { <a>Hello, {name}!</a> }
     }
 
-    assert_eq!(
-        render_bytes!(hello("world")).unwrap(),
-        b"<a>Hello, world!</a>"
-    );
+    assert_eq!(render_string!(hello("world")), "<a>Hello, world!</a>");
 }
 
 #[test]
@@ -32,8 +29,8 @@ fn spaces_around_block() {
     }
 
     assert_eq!(
-        render_bytes!(hello("world")).unwrap(),
-        b"<a>Hello, world - welcome!</a>"
+        render_string!(hello("world")),
+        "<a>Hello, world - welcome!</a>"
     );
 }
 
@@ -44,10 +41,7 @@ fn no_spaces_around_block() {
         tpl! { <a>Hello:{name}!</a> }
     }
 
-    assert_eq!(
-        render_bytes!(hello("world")).unwrap(),
-        b"<a>Hello:world!</a>"
-    );
+    assert_eq!(render_string!(hello("world")), "<a>Hello:world!</a>");
 }
 
 #[test]
@@ -58,8 +52,8 @@ fn attrs() {
     }
 
     assert_eq!(
-        render_bytes!(hello("world")).unwrap(),
-        b"<a class=\"world\">Hello!</a>"
+        render_string!(hello("world")),
+        "<a class=\"world\">Hello!</a>"
     );
 }
 
@@ -70,15 +64,12 @@ fn format_bytes() {
         tpl! { <a>Hello, {!b name}!</a> }
     }
 
-    assert_eq!(
-        render_bytes!(hello(b"world")).unwrap(),
-        b"<a>Hello, world!</a>"
-    );
+    assert_eq!(render_string!(hello(b"world")), "<a>Hello, world!</a>");
 }
 
 #[test]
 fn readme_example() {
-    use qtpl::{child, render_bytes, tpl, tplfn, Render};
+    use qtpl::{child, render_string, tpl, tplfn, Render};
 
     #[tplfn]
     fn page<B: Render, F: Render>(body: B, footer: F) {
@@ -112,10 +103,9 @@ fn readme_example() {
 
     let name = String::from("world");
     let company = "bigcorp";
-    let out = render_bytes!(home(name, company)).unwrap();
 
     assert_eq!(
-        String::from_utf8(out).unwrap(),
+        render_string!(home(name, company)),
         concat!(
             "<!doctype html> ",
             "<body> ",

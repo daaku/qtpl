@@ -105,7 +105,7 @@
 
 extern crate v_htmlescape;
 
-pub use qtpl_macros::{child, render_bytes, render_string, tpl, tplfn};
+pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
 
 pub trait Render {
