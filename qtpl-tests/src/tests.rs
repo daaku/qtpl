@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{child, render, tpl, tplfn};
+use qtpl::{child, render, tpl, tplfn, Render};
 
 #[test]
 fn plain_text() {
@@ -69,19 +69,6 @@ fn format_bytes() {
 
 #[test]
 fn child_elements() {
-    trait Render {
-        fn render(self, destination: &mut dyn ::std::io::Write) -> ::std::io::Result<()>;
-    }
-
-    impl<F> Render for F
-    where
-        F: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
-    {
-        fn render(self, destination: &mut dyn ::std::io::Write) -> ::std::io::Result<()> {
-            self(destination)
-        }
-    }
-
     #[tplfn]
     fn page<B: Render, F: Render>(body: B, footer: F) {
         tpl! {
