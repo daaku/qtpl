@@ -76,8 +76,8 @@ fn child_elements() {
         F: FnOnce(&mut dyn ::std::io::Write) -> ::std::io::Result<()>,
     {
         tpl! {
-            <body>{!c body()}</body>
-            <footer>{!c footer()}</footer>
+            <body>{!c body}</body>
+            <footer>{!c footer}</footer>
         }
     }
 
@@ -96,7 +96,7 @@ fn child_elements() {
         let b = child!(body(name));
         let f = child!(footer(company));
         tpl! {
-            {!c page(b, f)}
+            {!t page(b, f)}
         }
     }
 

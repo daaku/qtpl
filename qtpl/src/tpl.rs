@@ -26,6 +26,7 @@ enum Format {
     Raw,
     Quote,
     Bytes,
+    TplFn,
     Child,
 }
 
@@ -38,6 +39,7 @@ impl Parse for Format {
             match ms.as_str() {
                 "q" => Ok(Self::Quote),
                 "b" => Ok(Self::Bytes),
+                "t" => Ok(Self::TplFn),
                 "c" => Ok(Self::Child),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
@@ -57,9 +59,20 @@ struct Braced {
 
 fn child_call(expr: &syn::Expr) -> TokenStream {
     match expr {
+        syn::Expr::Path(p) => {
+            quote!(#p(w)?;)
+        },
+        _ => {
+            emit_error!(expr.span(), "expected an identifier here");
+            quote!()
+        }
+    }
+}
+
+fn tplfn_call(expr: &syn::Expr) -> TokenStream {
+    match expr {
         syn::Expr::Call(c) => {
             let mut c = c.clone();
-            // let arg: syn::Expr = syn::parse_quote!(&mut w);
             let arg: syn::Expr = syn::parse_quote!(w);
             c.args.insert(0, arg);
             quote!(#c?;)
@@ -87,6 +100,7 @@ impl ToTokens for Braced {
             Format::Raw => quote! { write!(w, "{}", #b)?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
             Format::Bytes => quote! { w.write(#b)?; },
+            Format::TplFn => tplfn_call(b),
             Format::Child => child_call(b),
         };
         ts.to_tokens(tokens);
