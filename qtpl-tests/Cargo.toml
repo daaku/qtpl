@@ -8,6 +8,7 @@ repository = "https://github.com/daaku/qtpl"
 
 [dependencies]
 qtpl = { path = "../qtpl" }
+v_htmlescape = "0.8"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

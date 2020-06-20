@@ -7,7 +7,7 @@ use syn::parse_macro_input;
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn render(input: TokenStream) -> TokenStream {
+pub fn render_bytes(input: TokenStream) -> TokenStream {
     let mut c = parse_macro_input!(input as syn::ExprCall);
     let arg: syn::Expr = syn::parse_quote!(&mut w);
     c.args.insert(0, arg);
@@ -19,6 +19,21 @@ pub fn render(input: TokenStream) -> TokenStream {
             } else {
                 ::std::result::Result::Ok(w)
             }
+        }
+    })
+}
+
+#[proc_macro]
+#[proc_macro_error]
+pub fn render_string(input: TokenStream) -> TokenStream {
+    let mut c = parse_macro_input!(input as syn::ExprCall);
+    let arg: syn::Expr = syn::parse_quote!(&mut w);
+    c.args.insert(0, arg);
+    TokenStream::from(quote! {
+        {
+            let mut w = Vec::new();
+            #c.unwrap();
+            String::from_utf8(w).unwrap()
         }
     })
 }

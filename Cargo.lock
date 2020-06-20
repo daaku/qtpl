@@ -10,6 +10,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cfg-if"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
+
+[[package]]
 name = "ctor"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -24,6 +30,22 @@ name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "524cbf6897b527295dff137cec09ecf3a05f4fddffd7dfcd1585403449e74198"
+
+[[package]]
+name = "memchr"
+version = "2.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400"
+
+[[package]]
+name = "nom"
+version = "4.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ad2a91a8e869eeb30b9cb3119ae87773a8f4ae617f41b1eb9c154b2905f7bd6"
+dependencies = [
+ "memchr",
+ "version_check 0.1.5",
+]
 
 [[package]]
 name = "output_vt100"
@@ -56,7 +78,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
- "version_check",
+ "version_check 0.9.2",
 ]
 
 [[package]]
@@ -69,7 +91,7 @@ dependencies = [
  "quote",
  "syn",
  "syn-mid",
- "version_check",
+ "version_check 0.9.2",
 ]
 
 [[package]]
@@ -86,6 +108,7 @@ name = "qtpl"
 version = "0.3.0"
 dependencies = [
  "qtpl-macros",
+ "v_htmlescape",
 ]
 
 [[package]]
@@ -105,6 +128,7 @@ version = "0.3.0"
 dependencies = [
  "pretty_assertions",
  "qtpl",
+ "v_htmlescape",
 ]
 
 [[package]]
@@ -143,6 +167,43 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
+
+[[package]]
+name = "v_escape"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f19b80184ed94715a263c37cb86453358d31550c1d181ab9a276f5085332750"
+dependencies = [
+ "v_escape_derive",
+]
+
+[[package]]
+name = "v_escape_derive"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a863d20185db05c32432e6391c1812d44935ba7c9937fb9ff659fa87883d6956"
+dependencies = [
+ "nom",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "v_htmlescape"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9dfa3371df45d2cc6ab2c97c2996e6c2a11169db7e0e847d75511634fbc1318e"
+dependencies = [
+ "cfg-if",
+ "v_escape",
+]
+
+[[package]]
+name = "version_check"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
 
 [[package]]
 name = "version_check"

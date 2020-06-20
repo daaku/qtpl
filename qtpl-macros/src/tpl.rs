@@ -23,7 +23,7 @@ fn literal_bytes(s: &str) -> TokenStream {
 }
 
 enum Format {
-    Raw,
+    Default,
     Quote,
     Bytes,
     TplFn,
@@ -43,11 +43,11 @@ impl Parse for Format {
                 "c" => Ok(Self::Child),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
-                    Ok(Self::Raw)
+                    Ok(Self::Default)
                 }
             }
         } else {
-            Ok(Self::Raw)
+            Ok(Self::Default)
         }
     }
 }
@@ -95,7 +95,7 @@ impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let b = &self.expr;
         let ts = match self.format {
-            Format::Raw => quote! { write!(w, "{}", #b)?; },
+            Format::Default => quote! { write!(w, "{}", v_htmlescape::escape(#b))?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
             Format::Bytes => quote! { w.write_all(#b)?; },
             Format::TplFn => tplfn_call(b),

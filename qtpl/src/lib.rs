@@ -5,12 +5,11 @@
 //! template code along side it.
 //!
 //! **Caveat**: This library is going to be mostly useful for HTML, primarily
-//! because it collapses whitespace. It not that it is tied to HTML in anyway
-//! though. This whitespace management is an artificat of how Rust macros work.
-//! One can inject newlines manually, but it will feel cumbersome. The rule is
-//! that all whitespace, including newlines are collapsed into a single space.
+//! because it collapses whitespace (whitespace, including newlines are
+//! collapsed into a single space). It also defaults to HTML escaping, though
+//! that can be altered by using directives.
 //!
-//! ### Basics
+//! # Basics
 //!
 //! The most basic template is this:
 //!
@@ -29,15 +28,14 @@
 //! and embedding some textual content. Lastly, we're putting the variable
 //! `name` inside another block.
 //!
-//! ### Rendering
+//! # Rendering
 //!
 //! Fundamentally rendering happens to something that implements
 //! `std::io::Write`. This means you could potentially write directly to a
 //! socket. Usually you'll buffer the content entirely, or use a buffered socket
 //! at the least.
 //!
-//! For example, if you wanted to write the above template to a file:
-//!
+//! ## To a `File`
 //! ```
 //! # use qtpl::{tplfn, tpl};
 //! #
@@ -48,10 +46,66 @@
 //! #
 //! let mut file = std::fs::File::create("/tmp/qtpl.txt")?;
 //! hello(&mut file, "world")?;
+//! #
+//! # Ok::<(), std::io::Error>(())
+//! ```
+//!
+//! ## To a `Vec<u8>`
+//! ```
+//! # use qtpl::{tplfn, tpl};
+//! #
+//! # #[tplfn]
+//! # fn hello(name: &str) {
+//! #     tpl! {Hello, {name}!}
+//! # }
+//! #
+//! let mut out = vec![];
+//! hello(&mut out, "world")?;
+//! assert_eq!(out, b"Hello, world!");
+//! #
+//! # Ok::<(), std::io::Error>(())
+//! ```
+//!
+//! ## To a `String` for Testing
+//! Purely as a convinience, a `render_string!` macro is provided which
+//! panics on errors, and returns a `String`. Remember, this is useful for
+//! testing and documentation, but you shouldn't be using this in production
+//! code, because it involves unnecessary copies and conversions.
+//!
+//! ```
+//! # use qtpl::{tplfn, tpl, render_string};
+//! #
+//! # #[tplfn]
+//! # fn hello(name: &str) {
+//! #     tpl! {Hello, {name}!}
+//! # }
+//! #
+//! assert_eq!(render_string!(hello("world")), "Hello, world!");
+//! #
+//! # Ok::<(), std::io::Error>(())
+//! ```
+//!
+//! # Escaping
+//!
+//! The default escaping used by the library is geared towards HTML. Using the
+//! same example above:
+//!
+//! ```
+//! # use qtpl::{tplfn, tpl, render_string};
+//! #
+//! # #[tplfn]
+//! # fn hello(name: &str) {
+//! #     tpl! {Hello, {name}!}
+//! # }
+//! #
+//! assert_eq!(render_string!(hello("<world>")), "Hello, &lt;world&gt;!");
+//! #
 //! # Ok::<(), std::io::Error>(())
 //! ```
 
-pub use qtpl_macros::{child, render, tpl, tplfn};
+extern crate v_htmlescape;
+
+pub use qtpl_macros::{child, render_bytes, render_string, tpl, tplfn};
 use std::io::{Result, Write};
 
 pub trait Render {

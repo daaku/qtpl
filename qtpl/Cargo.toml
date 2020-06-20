@@ -12,3 +12,4 @@ license = "MIT"
 
 [dependencies]
 qtpl-macros = { path = "../qtpl-macros" }
+v_htmlescape = "0.8"
