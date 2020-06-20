@@ -21,5 +21,4 @@ TODO
 - [ ] Support blocks inside string literals (maybe?)
 - [ ] Add documentation
 - [ ] Monitor test coverage in GitHub actions?
-- [ ] Switch to `write_all` and test for it
 - [ ] Document gotchas around whitespace

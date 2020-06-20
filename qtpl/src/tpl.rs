@@ -18,7 +18,7 @@ fn span_pos(s: &Span) -> (usize, usize) {
 fn literal_bytes(s: &str) -> TokenStream {
     let ls = syn::LitByteStr::new(s.as_bytes(), Span::call_site());
     quote! {
-        w.write(#ls)?;
+        w.write_all(#ls)?;
     }
 }
 
@@ -97,7 +97,7 @@ impl ToTokens for Braced {
         let ts = match self.format {
             Format::Raw => quote! { write!(w, "{}", #b)?; },
             Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
-            Format::Bytes => quote! { w.write(#b)?; },
+            Format::Bytes => quote! { w.write_all(#b)?; },
             Format::TplFn => tplfn_call(b),
             Format::Child => child_call(b),
         };
