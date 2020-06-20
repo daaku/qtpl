@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{child, html, tpl, tplfn};
+use qtpl::{child, render, tpl, tplfn};
 
 #[test]
 fn plain_text() {
@@ -8,7 +8,7 @@ fn plain_text() {
         tpl! { <a>Hello, world!</a> }
     }
 
-    assert_eq!(html!(hello()).unwrap(), b"<a>Hello, world!</a>");
+    assert_eq!(render!(hello()).unwrap(), b"<a>Hello, world!</a>");
 }
 
 #[test]
@@ -18,7 +18,7 @@ fn block_with_expr() {
         tpl! { <a>Hello, {name}!</a> }
     }
 
-    assert_eq!(html!(hello("world")).unwrap(), b"<a>Hello, world!</a>");
+    assert_eq!(render!(hello("world")).unwrap(), b"<a>Hello, world!</a>");
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn spaces_around_block() {
     }
 
     assert_eq!(
-        html!(hello("world")).unwrap(),
+        render!(hello("world")).unwrap(),
         b"<a>Hello, world - welcome!</a>"
     );
 }
@@ -41,7 +41,7 @@ fn no_spaces_around_block() {
         tpl! { <a>Hello:{name}!</a> }
     }
 
-    assert_eq!(html!(hello("world")).unwrap(), b"<a>Hello:world!</a>");
+    assert_eq!(render!(hello("world")).unwrap(), b"<a>Hello:world!</a>");
 }
 
 #[test]
@@ -52,7 +52,7 @@ fn attrs() {
     }
 
     assert_eq!(
-        html!(hello("world")).unwrap(),
+        render!(hello("world")).unwrap(),
         b"<a class=\"world\">Hello!</a>"
     );
 }
@@ -64,7 +64,7 @@ fn format_bytes() {
         tpl! { <a>Hello, {!b name}!</a> }
     }
 
-    assert_eq!(html!(hello(b"world")).unwrap(), b"<a>Hello, world!</a>");
+    assert_eq!(render!(hello(b"world")).unwrap(), b"<a>Hello, world!</a>");
 }
 
 #[test]
@@ -102,7 +102,7 @@ fn child_elements() {
 
     let name = String::from("world");
     let company = "bigcorp";
-    let result = String::from_utf8(html!(home(name, company)).unwrap()).unwrap();
+    let result = String::from_utf8(render!(home(name, company)).unwrap()).unwrap();
     assert_eq!(
         result,
         "<body>Hello, world!</body> <footer>Copyright bigcorp</footer>"

@@ -7,7 +7,7 @@ use syn::parse_macro_input;
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn html(input: TokenStream) -> TokenStream {
+pub fn render(input: TokenStream) -> TokenStream {
     let mut c = parse_macro_input!(input as syn::ExprCall);
     let arg: syn::Expr = syn::parse_quote!(&mut w);
     c.args.insert(0, arg);
