@@ -83,14 +83,14 @@ dependencies = [
 
 [[package]]
 name = "qtpl"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "qtpl-macros",
 ]
 
 [[package]]
 name = "qtpl-macros"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "pretty_assertions",
  "proc-macro-error",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "qtpl_tests"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "pretty_assertions",
  "qtpl",
