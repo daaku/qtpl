@@ -98,6 +98,36 @@
 //! # Ok::<(), std::io::Error>(())
 //! ```
 //!
+//! # Returning Errors
+//!
+//! The `#[tplfn]` attribute will add a return type of `std::io::Result<()>`,
+//! but only if one isn't present. You can customize the return type and take
+//! control of the errors being returned. The only requirement is that
+//! `std::io::Error` types can be converted into that error using the usual
+//! process.
+//!
+//! A contrived but real example:
+//!
+//! ```
+//! type BoxError = Box<dyn std::error::Error + Send + Sync>;
+//!
+//! #[tplfn]
+//! fn answer(a: &str) -> Result<(), BoxError> {
+//!     let a: i8 = a.parse()?;
+//!     tpl! {{&a.to_string()}}
+//! }
+//!
+//! assert_eq!(render_string!(answer("42")), "42");
+//!
+//! let mut w = vec![];
+//! match answer(&mut w, "not a number") {
+//!     Result::Err(err) => {
+//!         assert_eq!(format!("{}", err), "invalid digit found in string");
+//!     },
+//!     _ => panic!("expected an error"),
+//! };
+//! ```
+//!
 //! # Whitespace
 //!
 //! The library makes an opinionated stance on whitespace. The rules are as

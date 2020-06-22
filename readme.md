@@ -76,7 +76,6 @@ TODO
 - [ ] `child!` should support inline `tpl!` style
 - [ ] Support more formatting directives
 - [ ] Support methods in addition to functions in `tplfn`
-- [ ] Support returning errors (ideally unopinionated)
 - [ ] Support `async`/`await` functions (needs anything special?)
 - [ ] Support blocks inside string literals (maybe?)
 - [ ] Add documentation

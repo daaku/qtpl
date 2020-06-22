@@ -34,7 +34,12 @@ pub fn tplfn(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut f = parse_macro_input!(item as syn::ItemFn);
     let arg: syn::FnArg = syn::parse_quote!(w: &mut dyn ::std::io::Write);
     f.sig.inputs.insert(0, arg);
-    f.sig.output = syn::parse_quote!(-> ::std::result::Result<(), ::std::io::Error>);
+    match f.sig.output {
+        syn::ReturnType::Default => {
+            f.sig.output = syn::parse_quote!(-> ::std::result::Result<(), ::std::io::Error>);
+        }
+        _ => (),
+    }
     TokenStream::from(quote!(#f))
 }
 
