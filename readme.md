@@ -78,5 +78,3 @@ TODO
 - [ ] Support methods in addition to functions in `tplfn`
 - [ ] Support `async`/`await` functions (needs anything special?)
 - [ ] Support blocks inside string literals (maybe?)
-- [ ] Add documentation
-- [ ] Monitor test coverage in GitHub actions?

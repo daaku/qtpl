@@ -109,6 +109,8 @@
 //! A contrived but real example:
 //!
 //! ```
+//! # use qtpl::{tplfn, tpl, render_string};
+//!
 //! type BoxError = Box<dyn std::error::Error + Send + Sync>;
 //!
 //! #[tplfn]
