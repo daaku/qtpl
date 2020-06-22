@@ -2,7 +2,6 @@ use proc_macro2::{Delimiter, Span, TokenStream, TokenTree};
 use proc_macro_error::emit_error;
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream, Result};
-use syn::spanned::Spanned;
 
 // GIANT HACK until the span start/end methods are available in stable
 fn span_pos(s: &Span) -> (usize, usize) {
@@ -22,84 +21,49 @@ fn literal_bytes(s: &str) -> TokenStream {
     }
 }
 
-enum Format {
-    Default,
-    Quote,
-    Bytes,
-    TplFn,
-    Child,
+enum Braced {
+    Default(syn::Expr),
+    Quote(syn::Expr),
+    Bytes(syn::Expr),
+    TplFn(syn::ExprCall),
+    Child(syn::ExprPath),
 }
 
-impl Parse for Format {
+impl Parse for Braced {
     fn parse(input: ParseStream) -> Result<Self> {
         let fp: Result<syn::Token![!]> = input.parse();
         if fp.is_ok() {
             let modifier: syn::Ident = input.parse()?;
             let ms = modifier.to_string();
             match ms.as_str() {
-                "q" => Ok(Self::Quote),
-                "b" => Ok(Self::Bytes),
-                "t" => Ok(Self::TplFn),
-                "c" => Ok(Self::Child),
+                "q" => Ok(Self::Quote(input.parse()?)),
+                "b" => Ok(Self::Bytes(input.parse()?)),
+                "t" => Ok(Self::TplFn(input.parse()?)),
+                "c" => Ok(Self::Child(input.parse()?)),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
-                    Ok(Self::Default)
+                    Ok(Self::Default(input.parse()?))
                 }
             }
         } else {
-            Ok(Self::Default)
+            Ok(Self::Default(input.parse()?))
         }
-    }
-}
-
-struct Braced {
-    format: Format,
-    expr: syn::Expr,
-}
-
-fn child_call(expr: &syn::Expr) -> TokenStream {
-    match expr {
-        syn::Expr::Path(p) => quote!(#p.render(w)?;),
-        _ => {
-            emit_error!(expr.span(), "expected an identifier here");
-            quote!()
-        }
-    }
-}
-
-fn tplfn_call(expr: &syn::Expr) -> TokenStream {
-    match expr {
-        syn::Expr::Call(c) => {
-            let mut c = c.clone();
-            let arg: syn::Expr = syn::parse_quote!(w);
-            c.args.insert(0, arg);
-            quote!(#c?;)
-        }
-        _ => {
-            emit_error!(expr.span(), "expected call expression here");
-            quote!()
-        }
-    }
-}
-
-impl Parse for Braced {
-    fn parse(input: ParseStream) -> Result<Self> {
-        Ok(Braced {
-            format: input.parse()?,
-            expr: input.parse()?,
-        })
     }
 }
 
 impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let b = &self.expr;
-        let ts = match self.format {
-            Format::Default => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
-            Format::Quote => quote! { write!(w, "\"{}\"", #b)?; },
-            Format::Bytes => quote! { w.write_all(#b)?; },
-            Format::TplFn => tplfn_call(b),
-            Format::Child => child_call(b),
+        let ts = match self {
+            Braced::Default(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
+            Braced::Quote(b) => quote! { write!(w, "\"{}\"", #b)?; },
+            Braced::Bytes(b) => quote! { w.write_all(#b)?; },
+            Braced::TplFn(b) => {
+                let mut c = b.clone();
+                let arg: syn::Expr = syn::parse_quote!(w);
+                c.args.insert(0, arg);
+                quote!{ #c?; }
+            },
+            Braced::Child(b) => quote!{ #b.render(w)?; },
         };
         ts.to_tokens(tokens);
     }
