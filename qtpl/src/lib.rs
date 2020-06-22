@@ -1,13 +1,8 @@
 //! Templates in your Rust code.
 //!
-//! This library allows you to write templates, using macros, mixed in with your
-//! Rust code. This allows you to use normal Rust code for the logic, and embed
-//! template code along side it.
-//!
-//! **Caveat**: This library is going to be mostly useful for HTML, primarily
-//! because it collapses whitespace (whitespace, including newlines are
-//! collapsed into a single space). It also defaults to HTML escaping, though
-//! that can be altered by using directives.
+//! This library allows you to write HTML templates, using macros, mixed in
+//! with your Rust code. This allows you to use normal Rust code for the logic,
+//! and embed template code along side it.
 //!
 //! # Basics
 //!
@@ -18,7 +13,7 @@
 //!
 //! #[tplfn]
 //! fn hello(name: &str) {
-//!     tpl! {Hello, {name}!}
+//!     tpl! {Hello, <strong>{name}</strong>!}
 //! }
 //! ```
 //!
@@ -41,7 +36,7 @@
 //! #
 //! # #[tplfn]
 //! # fn hello(name: &str) {
-//! #     tpl! {Hello, {name}!}
+//! #     tpl! {Hello, <strong>{name}</strong>!}
 //! # }
 //! #
 //! let mut file = std::fs::File::create("/tmp/qtpl.txt")?;
@@ -56,12 +51,12 @@
 //! #
 //! # #[tplfn]
 //! # fn hello(name: &str) {
-//! #     tpl! {Hello, {name}!}
+//! #     tpl! {Hello, <strong>{name}</strong>!}
 //! # }
 //! #
 //! let mut out = vec![];
 //! hello(&mut out, "world")?;
-//! assert_eq!(out, b"Hello, world!");
+//! assert_eq!(out, b"Hello, <strong>world</strong>!");
 //! #
 //! # Ok::<(), std::io::Error>(())
 //! ```
@@ -77,10 +72,10 @@
 //! #
 //! # #[tplfn]
 //! # fn hello(name: &str) {
-//! #     tpl! {Hello, {name}!}
+//! #     tpl! {Hello, <strong>{name}</strong>!}
 //! # }
 //! #
-//! assert_eq!(render_string!(hello("world")), "Hello, world!");
+//! assert_eq!(render_string!(hello("world")), "Hello, <strong>world</strong>!");
 //! #
 //! # Ok::<(), std::io::Error>(())
 //! ```
@@ -95,13 +90,25 @@
 //! #
 //! # #[tplfn]
 //! # fn hello(name: &str) {
-//! #     tpl! {Hello, {name}!}
+//! #     tpl! {Hello, <strong>{name}</strong>!}
 //! # }
 //! #
-//! assert_eq!(render_string!(hello("<world>")), "Hello, &lt;world&gt;!");
+//! assert_eq!(render_string!(hello("<world>")), "Hello, <strong>&lt;world&gt;</strong>!");
 //! #
 //! # Ok::<(), std::io::Error>(())
 //! ```
+//!
+//! # Whitespace
+//!
+//! The library makes an opinionated stance on whitespace. The rules are as
+//! follows:
+//!
+//! * Whitespace at the begining of the template is stripped.
+//! * Whitespace at the end of the template is stripped.
+//! * Whitespace immediately after an open tag is stripped.
+//! * Whitespace immediately before a close tag is stripped.
+//! * All whitespace, including newlines is collapsed into a single space.
+//! * Rules only apply to template text, contents of varibles are not modified.
 
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};

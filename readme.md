@@ -57,10 +57,10 @@ let result = String::from_utf8(out).unwrap();
 assert_eq!(
     String::from_utf8(out).unwrap(),
     concat!(
-        "<!doctype html> ",
-        "<body> ",
-        "Hello, world! ",
-        "<footer>Copyright bigcorp</footer> ",
+        "<!doctype html>",
+        "<body>",
+        "Hello, world!",
+        "<footer>Copyright bigcorp</footer>",
         "</body>",
     )
 );
@@ -69,6 +69,9 @@ assert_eq!(
 TODO
 ====
 
+- [ ] Make whitespace handling fully HTML aware and automatically correct
+- [ ] Make default escaping fully HTML aware and automatically correct: content, attributes, JS, CSS, etc
+- [ ] Support automatic JSON inside <script>
 - [ ] Document pattern for passing children to tplfn
 - [ ] `child!` should support inline `tpl!` style
 - [ ] Support more formatting directives
@@ -78,4 +81,3 @@ TODO
 - [ ] Support blocks inside string literals (maybe?)
 - [ ] Add documentation
 - [ ] Monitor test coverage in GitHub actions?
-- [ ] Document gotchas around whitespace
