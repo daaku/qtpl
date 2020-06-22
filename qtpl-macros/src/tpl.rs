@@ -1,23 +1,31 @@
-use proc_macro2::{Delimiter, Span, TokenStream, TokenTree};
+use proc_macro2::{Span, TokenStream};
 use proc_macro_error::emit_error;
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream, Result};
+use syn::spanned::Spanned;
 
 // GIANT HACK until the span start/end methods are available in stable
-fn span_pos(s: &Span) -> (usize, usize) {
-    let d = format!("{:?}", s);
-    let s = d.find('(').unwrap();
-    let e = d.find('.').unwrap();
-    (
-        d[s + 1..e].parse().unwrap(),
-        d[e + 2..d.len() - 1].parse().unwrap(),
-    )
+#[derive(Default, Copy, Clone)]
+struct SpanPos {
+    start: usize,
+    end: usize,
 }
 
-fn literal_bytes(s: &str) -> TokenStream {
-    let ls = syn::LitByteStr::new(s.as_bytes(), Span::call_site());
-    quote! {
-        w.write_all(#ls)?;
+impl From<Span> for SpanPos {
+    fn from(span: Span) -> Self {
+        let d = format!("{:?}", span);
+        let s = d.find('(').unwrap();
+        let e = d.find('.').unwrap();
+        Self {
+            start: d[s + 1..e].parse().unwrap(),
+            end: d[e + 2..d.len() - 1].parse().unwrap(),
+        }
+    }
+}
+
+impl SpanPos {
+    fn move_end<T: Into<SpanPos>>(&mut self, end: T) {
+        self.end = end.into().end;
     }
 }
 
@@ -53,80 +61,192 @@ impl Parse for Braced {
 
 impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let ts = match self {
-            Braced::Default(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
-            Braced::Quote(b) => quote! { write!(w, "\"{}\"", #b)?; },
-            Braced::Bytes(b) => quote! { w.write_all(#b)?; },
-            Braced::TplFn(b) => {
+        match self {
+            Self::Default(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
+            Self::Quote(b) => quote! { write!(w, "\"{}\"", #b)?; },
+            Self::Bytes(b) => quote! { w.write_all(#b)?; },
+            Self::TplFn(b) => {
                 let mut c = b.clone();
                 let arg: syn::Expr = syn::parse_quote!(w);
                 c.args.insert(0, arg);
-                quote!{ #c?; }
-            },
-            Braced::Child(b) => quote!{ #b.render(w)?; },
-        };
-        ts.to_tokens(tokens);
+                quote! { #c?; }
+            }
+            Self::Child(b) => quote! { #b.render(w)?; },
+        }
+        .to_tokens(tokens);
     }
 }
 
-fn parse_braced(g: proc_macro2::Group) -> Result<TokenStream> {
-    let braced: Braced = syn::parse2(g.stream())?;
-    Ok(quote!(#braced))
+struct Name {
+    value: String,
+    span_pos: SpanPos,
 }
 
-fn is_braced_group(tt: &TokenTree) -> bool {
-    if let TokenTree::Group(g) = tt {
-        g.delimiter() == Delimiter::Brace
-    } else {
-        false
+impl Parse for Name {
+    fn parse(input: ParseStream) -> Result<Self> {
+        input.step(|cursor| {
+            let mut value = String::new();
+            let mut span_pos = SpanPos::default();
+            let mut rest = *cursor;
+            let mut first = true;
+            while let Some((tt, next)) = rest.token_tree() {
+                let tts = tt.to_string();
+                if first {
+                    span_pos = SpanPos::from(tt.span());
+                    first = false;
+                } else {
+                    let cur_span = SpanPos::from(tt.span());
+                    if span_pos.end != cur_span.start {
+                        break;
+                    }
+                    let first = tts.chars().next().unwrap();
+                    if !first.is_alphabetic() && first != '/' {
+                        break;
+                    }
+                    span_pos.move_end(cur_span);
+                }
+                value.push_str(&tts);
+                rest = next;
+            }
+            Ok((Self { value, span_pos }, rest))
+        })
+    }
+}
+
+enum ItemElement {
+    Literal(String),
+    Braced(Braced),
+    StartOpenTag(Name),
+    StartCloseTag(Name),
+    EndTag,
+}
+
+struct Item {
+    element: ItemElement,
+    span_pos: SpanPos,
+}
+
+impl Item {
+    fn new(span_pos: SpanPos, element: ItemElement) -> Self {
+        Item { span_pos, element }
+    }
+}
+
+impl Parse for Item {
+    fn parse(input: ParseStream) -> Result<Self> {
+        // we get the starting position from the first span, and then we'll move
+        // the end once we figure out where that is exactly.
+        let mut span_pos = SpanPos::from(input.span());
+        if input.peek(syn::Token!(<)) {
+            input.parse::<syn::Token!(<)>()?;
+            if input.peek(syn::Token!(/)) {
+                input.parse::<syn::Token!(/)>()?;
+                let name = input.parse::<Name>()?;
+                span_pos.move_end(name.span_pos);
+                Ok(Self::new(span_pos, ItemElement::StartCloseTag(name)))
+            } else {
+                let name = input.parse::<Name>()?;
+                span_pos.move_end(name.span_pos);
+                Ok(Self::new(span_pos, ItemElement::StartOpenTag(name)))
+            }
+        } else if input.peek(syn::Token!(>)) {
+            let angle = input.parse::<syn::Token!(>)>()?;
+            span_pos.move_end(angle.span());
+            Ok(Self::new(span_pos, ItemElement::EndTag))
+        } else if input.peek(syn::token::Brace) {
+            let content;
+            let braced = syn::braced!(content in input);
+            span_pos.move_end(braced.span);
+            Ok(Self::new(span_pos, ItemElement::Braced(content.parse()?)))
+        } else {
+            Ok(Self::new(
+                span_pos,
+                ItemElement::Literal(input.step(|cursor| {
+                    if let Some((tt, next)) = cursor.token_tree() {
+                        span_pos.move_end(tt.span());
+                        Ok((tt.to_string(), next))
+                    } else {
+                        panic!("unexpected internal error: was expecting some tokens");
+                    }
+                })?),
+            ))
+        }
+    }
+}
+
+impl ToTokens for Item {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match &self.element {
+            ItemElement::Literal(l) => {
+                let ls = syn::LitByteStr::new(l.as_bytes(), Span::call_site());
+                quote! {
+                    w.write_all(#ls)?;
+                }
+            }
+            ItemElement::Braced(b) => quote! { #b },
+            _ => panic!("unexpected ToTokens for item besides Literal or Braced"),
+        }
+        .to_tokens(tokens)
     }
 }
 
 pub struct Template {
-    items: Vec<TokenStream>,
+    items: Vec<Item>,
 }
 
 impl Parse for Template {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut items = vec![];
-        input.step(|cursor| {
-            let mut s = String::new();
-            let mut prev_end = 0;
-            let mut skip_space = true;
-            let mut rest = *cursor;
-            while let Some((tt, next)) = rest.token_tree() {
-                let (span_start, span_end) = span_pos(&tt.span());
-                if !skip_space && prev_end != span_start {
-                    s.push_str(" ");
-                }
-                skip_space = false;
-                prev_end = span_end;
+        let mut literal = String::new();
+        let mut literal_start_pos = SpanPos::default();
+        let mut prev_span_pos = SpanPos::default();
+        let mut skip_space = true;
+        while !input.is_empty() {
+            let item = Item::parse(input)?;
+            let span_pos = item.span_pos;
 
-                if is_braced_group(&tt) {
-                    if let TokenTree::Group(g) = tt {
-                        items.push(literal_bytes(&s));
-                        s.truncate(0);
-                        items.push(parse_braced(g)?);
-                        rest = next;
-                        continue;
-                    }
-                    panic!("unexpected");
-                }
-
-                s.push_str(&tt.to_string());
-                rest = next
+            if literal.is_empty() {
+                literal_start_pos = span_pos;
             }
-            items.push(literal_bytes(&s));
-            Ok(((), rest))
-        })?;
-        items.push(quote!(Ok(())));
-        Ok(Template { items })
+
+            if !skip_space && prev_span_pos.end != span_pos.start {
+                literal.push_str(" ");
+            }
+            prev_span_pos = span_pos;
+            skip_space = false;
+
+            match &item.element {
+                ItemElement::Literal(l) => literal.push_str(l),
+                ItemElement::Braced(_) => {
+                    if !literal.is_empty() {
+                        let mut span_pos = literal_start_pos;
+                        span_pos.move_end(prev_span_pos);
+                        items.push(Item::new(span_pos, ItemElement::Literal(literal)));
+                        literal = String::new();
+                    }
+                    items.push(item);
+                }
+                ItemElement::StartOpenTag(n) => literal.push_str(&format!("<{}", n.value)),
+                ItemElement::StartCloseTag(n) => literal.push_str(&format!("</{}", n.value)),
+                ItemElement::EndTag => literal.push_str(">"),
+            }
+        }
+        if !literal.is_empty() {
+            let mut span_pos = literal_start_pos;
+            span_pos.move_end(prev_span_pos);
+            items.push(Item::new(span_pos, ItemElement::Literal(literal)));
+        }
+        Ok(Self { items })
     }
 }
 
 impl ToTokens for Template {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let items = self.items.iter();
-        quote!(#(#items)*).to_tokens(tokens);
+        let q = quote! {
+            #(#items)*
+            Ok(())
+        };
+        q.to_tokens(tokens);
     }
 }
