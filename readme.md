@@ -71,8 +71,6 @@ TODO
 
 - [ ] Support more formatting directives
 - [ ] Support a directive to explicitly clear whitespace
-- [ ] Make default escaping fully HTML aware and automatically correct: content, attributes, JS, CSS, etc
-- [ ] Support automatic JSON inside <script>
 - [ ] Document pattern for passing children to tplfn
 - [ ] `child!` should support inline `tpl!` style
 - [ ] Support methods in addition to functions in `tplfn`
