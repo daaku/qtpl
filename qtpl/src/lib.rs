@@ -35,8 +35,8 @@
 //!
 //! Fundamentally rendering happens to something that implements
 //! `std::io::Write`. This means you could potentially write directly to a
-//! socket. Usually you'll buffer the content entirely, or use a buffered socket
-//! at the least.
+//! socket. Usually you'll buffer the content entirely, or use a buffered
+//! writer at the least.
 //!
 //! ## To a `File`
 //! ```
@@ -140,7 +140,7 @@
 //!
 //! # Whitespace
 //!
-//! The library makes an opinionated stance on whitespace. The rules are as
+//! The library takes an opinionated stance on whitespace. The rules are as
 //! follows:
 //!
 //! * Whitespace at the begining of the template is stripped.
