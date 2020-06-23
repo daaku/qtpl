@@ -1,7 +1,7 @@
 qtpl
 ====
 
-[![Rust](https://github.com/daaku/qtpl/workflows/Rust/badge.svg)](https://github.com/daaku/qtpl/actions?query=workflow%3ARust)
+[![Build](https://github.com/daaku/qtpl/workflows/build/badge.svg)](https://github.com/daaku/qtpl/actions?query=workflow%3Abuild)
 [![Crates.io](https://img.shields.io/crates/v/qtpl)](https://crates.io/crates/qtpl)
 [![Documentation](https://docs.rs/qtpl/badge.svg)](https://docs.rs/qtpl)
 
@@ -69,13 +69,13 @@ assert_eq!(
 TODO
 ====
 
+- [ ] Support more formatting directives
+- [ ] Support a directive to explicitly clear whitespace
 - [ ] Make default escaping fully HTML aware and automatically correct: content, attributes, JS, CSS, etc
 - [ ] Automatically quote braced attributes
-- [ ] Support a directive to explicitly clear whitespace
 - [ ] Support automatic JSON inside <script>
 - [ ] Document pattern for passing children to tplfn
 - [ ] `child!` should support inline `tpl!` style
-- [ ] Support more formatting directives
 - [ ] Support methods in addition to functions in `tplfn`
 - [ ] Support `async`/`await` functions (needs anything special?)
 - [ ] Support blocks inside string literals (maybe?)
