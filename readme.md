@@ -71,6 +71,7 @@ TODO
 
 - [ ] Make default escaping fully HTML aware and automatically correct: content, attributes, JS, CSS, etc
 - [ ] Automatically quote braced attributes
+- [ ] Support a directive to explicitly clear whitespace
 - [ ] Support automatic JSON inside <script>
 - [ ] Document pattern for passing children to tplfn
 - [ ] `child!` should support inline `tpl!` style

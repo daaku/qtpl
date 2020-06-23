@@ -4,6 +4,14 @@
 //! with your Rust code. This allows you to use normal Rust code for the logic,
 //! and embed template code along side it.
 //!
+//! **Contents:**
+//!
+//! 1. [Basics](#basics)
+//! 1. [Rendering](#rendering)
+//! 1. [Escaping](#escaping)
+//! 1. [Returning Errors](#returning-errors)
+//! 1. [Whitespace](#whitespace)
+//!
 //! # Basics
 //!
 //! The most basic template is this:
