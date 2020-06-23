@@ -185,8 +185,14 @@
 
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
+
+// This is used internally for escaping in macro output.
+#[doc(hidden)]
 pub use v_htmlescape::escape;
 
+// This is used internally for closures created by child components and is
+// automatically implemented by them.
+#[doc(hidden)]
 pub trait Render {
     fn render(self, destination: &mut dyn Write) -> Result<()>;
 }
