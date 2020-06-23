@@ -87,6 +87,32 @@ fn whitespace_insensitive() {
     assert_eq!(render_string!(hello()), "<a>Hello,<div>world</div>!</a>");
 }
 
+const XSS: &str = r#"You're <script>alert("pawned")</script>!"#;
+
+#[test]
+fn escape_content() {
+    #[tplfn]
+    fn t(v: &str) {
+        tpl! { <a>{v}</a> }
+    }
+    assert_eq!(
+        render_string!(t(XSS)),
+        "<a>You&#x27;re &lt;script&gt;alert(&quot;pawned&quot;)&lt;&#x2f;script&gt;!</a>",
+    );
+}
+
+#[test]
+fn escape_attr() {
+    #[tplfn]
+    fn t(v: &str) {
+        tpl! { <a id={v}> }
+    }
+    assert_eq!(
+        render_string!(t(XSS)),
+        r#"<a id="You&#x27;re &lt;script&gt;alert(&quot;pawned&quot;)&lt;&#x2f;script&gt;!">"#,
+    );
+}
+
 #[test]
 fn readme_example() {
     use qtpl::{child, render_string, tpl, tplfn, Render};

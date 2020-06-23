@@ -85,6 +85,8 @@ impl SpanPos {
 
 enum Braced {
     Default(syn::Expr),
+    Attribute(syn::Expr),
+    Content(syn::Expr),
     Quote(syn::Expr),
     Bytes(syn::Expr),
     TplFn(syn::ExprCall),
@@ -98,10 +100,11 @@ impl Parse for Braced {
             let modifier: syn::Ident = input.parse()?;
             let ms = modifier.to_string();
             match ms.as_str() {
-                "q" => Ok(Self::Quote(input.parse()?)),
+                "a" => Ok(Self::Attribute(input.parse()?)),
                 "b" => Ok(Self::Bytes(input.parse()?)),
-                "t" => Ok(Self::TplFn(input.parse()?)),
                 "c" => Ok(Self::Child(input.parse()?)),
+                "q" => Ok(Self::Quote(input.parse()?)),
+                "t" => Ok(Self::TplFn(input.parse()?)),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
                     Ok(Self::Default(input.parse()?))
@@ -116,7 +119,9 @@ impl Parse for Braced {
 impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
-            Self::Default(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
+            Self::Default(_) => panic!("Default should have been transformed!"),
+            Self::Content(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
+            Self::Attribute(b) => quote! { write!(w, "\"{}\"", ::qtpl::escape(#b))?; },
             Self::Quote(b) => quote! { write!(w, "\"{}\"", #b)?; },
             Self::Bytes(b) => quote! { w.write_all(#b)?; },
             Self::TplFn(b) => {
@@ -183,6 +188,23 @@ struct Item {
 impl Item {
     fn new(span_pos: SpanPos, element: ItemElement) -> Self {
         Item { span_pos, element }
+    }
+
+    fn alter_braced_default(&mut self, in_open_tag: bool) {
+        match &self.element {
+            ItemElement::Braced(b) => match b {
+                Braced::Default(e) => {
+                    let e = e.clone();
+                    self.element = if in_open_tag {
+                        ItemElement::Braced(Braced::Attribute(e))
+                    } else {
+                        ItemElement::Braced(Braced::Content(e))
+                    };
+                }
+                _ => (),
+            },
+            _ => (),
+        }
     }
 }
 
@@ -256,8 +278,9 @@ impl Parse for Template {
         let mut prev_span_pos = SpanPos::default();
         let mut skip_space = true;
         let mut current_tag = String::new();
+        let mut in_open_tag = false;
         while !input.is_empty() {
-            let item = Item::parse(input)?;
+            let mut item = Item::parse(input)?;
             let span_pos = item.span_pos;
 
             if literal.is_empty() {
@@ -279,6 +302,7 @@ impl Parse for Template {
                         items.push(Item::new(span_pos, ItemElement::Literal(literal)));
                         literal = String::new();
                     }
+                    item.alter_braced_default(in_open_tag);
                     items.push(item);
                 }
                 ItemElement::StartOpenTag(n) => {
@@ -287,6 +311,7 @@ impl Parse for Template {
                         literal = literal.trim_end().to_owned();
                     }
                     literal.push_str(&format!("<{}", current_tag));
+                    in_open_tag = true;
                 }
                 ItemElement::StartCloseTag(n) => {
                     current_tag = n.value;
@@ -300,6 +325,7 @@ impl Parse for Template {
                         skip_space = true;
                     }
                     literal.push_str(">");
+                    in_open_tag = false;
                 }
             }
         }
