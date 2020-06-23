@@ -191,19 +191,15 @@ impl Item {
     }
 
     fn alter_braced_default(&mut self, in_open_tag: bool) {
-        match &self.element {
-            ItemElement::Braced(b) => match b {
-                Braced::Default(e) => {
-                    let e = e.clone();
-                    self.element = if in_open_tag {
-                        ItemElement::Braced(Braced::Attribute(e))
-                    } else {
-                        ItemElement::Braced(Braced::Content(e))
-                    };
+        if let ItemElement::Braced(b) = &self.element {
+            if let Braced::Default(e) = b {
+                let e = e.clone();
+                self.element = if in_open_tag {
+                    ItemElement::Braced(Braced::Attribute(e))
+                } else {
+                    ItemElement::Braced(Braced::Content(e))
                 }
-                _ => (),
-            },
-            _ => (),
+            }
         }
     }
 }
