@@ -137,8 +137,8 @@
 //!
 //! * Whitespace at the begining of the template is stripped.
 //! * Whitespace at the end of the template is stripped.
-//! * Whitespace immediately after an open tag is stripped.
-//! * Whitespace immediately before a close tag is stripped.
+//! * Whitespace around a whitelisted set of elements, where it should be
+//!   insignificant is stripped.
 //! * All whitespace, including newlines is collapsed into a single space.
 //! * Rules only apply to template text, contents of varibles are not modified.
 

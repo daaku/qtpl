@@ -68,6 +68,26 @@ fn format_bytes() {
 }
 
 #[test]
+fn whitespace_sensitive() {
+    #[tplfn]
+    fn hello() {
+        tpl! { <a>Hello, <i>  world </i> !</a> }
+    }
+
+    assert_eq!(render_string!(hello()), "<a>Hello, <i> world </i> !</a>");
+}
+
+#[test]
+fn whitespace_insensitive() {
+    #[tplfn]
+    fn hello() {
+        tpl! { <a>Hello, <div> world </div> !</a> }
+    }
+
+    assert_eq!(render_string!(hello()), "<a>Hello,<div>world</div>!</a>");
+}
+
+#[test]
 fn readme_example() {
     use qtpl::{child, render_string, tpl, tplfn, Render};
 
@@ -107,10 +127,10 @@ fn readme_example() {
     assert_eq!(
         render_string!(home(name, company)),
         concat!(
-            "<!doctype html> ",
-            "<body> ",
-            "Hello, world! ",
-            "<footer>Copyright bigcorp</footer> ",
+            "<!doctype html>",
+            "<body>",
+            "Hello, world!",
+            "<footer>Copyright bigcorp</footer>",
             "</body>",
         )
     );

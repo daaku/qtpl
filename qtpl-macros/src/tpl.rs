@@ -4,6 +4,60 @@ use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;
 
+const WHITESPACE_INSENSITIVE: &[&str] = &[
+    "!doctype",
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "body",
+    "br",
+    "caption",
+    "col",
+    "colgroup",
+    "dd",
+    "div",
+    "dl",
+    "dt",
+    "embed",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "head",
+    "header",
+    "hgroup",
+    "hr",
+    "html",
+    "li",
+    "main",
+    "meta",
+    "nav",
+    "noscript",
+    "ol",
+    "output",
+    "p",
+    "pre",
+    "section",
+    "style",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "title",
+    "tr",
+    "ul",
+];
+
 // GIANT HACK until the span start/end methods are available in stable
 #[derive(Default, Copy, Clone)]
 struct SpanPos {
@@ -201,6 +255,7 @@ impl Parse for Template {
         let mut literal_start_pos = SpanPos::default();
         let mut prev_span_pos = SpanPos::default();
         let mut skip_space = true;
+        let mut current_tag = String::new();
         while !input.is_empty() {
             let item = Item::parse(input)?;
             let span_pos = item.span_pos;
@@ -215,8 +270,8 @@ impl Parse for Template {
             prev_span_pos = span_pos;
             skip_space = false;
 
-            match &item.element {
-                ItemElement::Literal(l) => literal.push_str(l),
+            match item.element {
+                ItemElement::Literal(l) => literal.push_str(&l),
                 ItemElement::Braced(_) => {
                     if !literal.is_empty() {
                         let mut span_pos = literal_start_pos;
@@ -226,9 +281,26 @@ impl Parse for Template {
                     }
                     items.push(item);
                 }
-                ItemElement::StartOpenTag(n) => literal.push_str(&format!("<{}", n.value)),
-                ItemElement::StartCloseTag(n) => literal.push_str(&format!("</{}", n.value)),
-                ItemElement::EndTag => literal.push_str(">"),
+                ItemElement::StartOpenTag(n) => {
+                    current_tag = n.value;
+                    if WHITESPACE_INSENSITIVE.contains(&current_tag.as_str()) {
+                        literal = literal.trim_end().to_owned();
+                    }
+                    literal.push_str(&format!("<{}", current_tag));
+                }
+                ItemElement::StartCloseTag(n) => {
+                    current_tag = n.value;
+                    if WHITESPACE_INSENSITIVE.contains(&current_tag.as_str()) {
+                        literal = literal.trim_end().to_owned();
+                    }
+                    literal.push_str(&format!("</{}", current_tag));
+                }
+                ItemElement::EndTag => {
+                    if WHITESPACE_INSENSITIVE.contains(&current_tag.as_str()) {
+                        skip_space = true;
+                    }
+                    literal.push_str(">");
+                }
             }
         }
         if !literal.is_empty() {
