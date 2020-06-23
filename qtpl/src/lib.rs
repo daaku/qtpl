@@ -1,8 +1,8 @@
 //! Templates in your Rust code.
 //!
-//! This library allows you to write HTML templates, using macros, mixed in
-//! with your Rust code. This allows you to use normal Rust code for the logic,
-//! and embed template code along side it.
+//! This library allows you to write HTML templates, using the power of macros,
+//! mixed in with your Rust code. This allows you to use normal Rust code for
+//! the logic, and embed template code along side it.
 //!
 //! **Contents:**
 //!
