@@ -105,7 +105,7 @@ dependencies = [
 
 [[package]]
 name = "qtpl"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "qtpl-macros",
  "v_htmlescape",
@@ -113,7 +113,7 @@ dependencies = [
 
 [[package]]
 name = "qtpl-macros"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "pretty_assertions",
  "proc-macro-error",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "qtpl_tests"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "pretty_assertions",
  "qtpl",
