@@ -142,11 +142,9 @@
 //! * All whitespace, including newlines is collapsed into a single space.
 //! * Rules only apply to template text, contents of varibles are not modified.
 //!
-//! ## Tag Aware Whitespace
-//!
-//! This example shows an some of the important aspects of whitespace handling,
-//! including how certain tags behave differently, and how multiple spaces
-//! including newlines are collapsed:
+//! This example shows all the rules in action, including how certain tags
+//! behave differently, and how multiple spaces including newlines are
+//! collapsed:
 //!
 //! ```
 //! # use qtpl::{tplfn, tpl, render_string};
@@ -156,14 +154,24 @@
 //!     tpl! {
 //!         <div>
 //!             <a>Go <i class="icon">   </i></a>
+//!             <a>{"   "}</a>
 //!         </div>
 //!     }
 //! }
 //!
-//! assert_eq!(render_string!(home()), r#"<div><a>Go <i class="icon"> </i></a></div>"#);
+//! assert_eq!(
+//!     render_string!(home()),
+//!     concat!(
+//!         "<div>",
+//!         r#"<a>Go <i class="icon"> </i></a>"#,
+//!         " ",
+//!         "<a>   </a>",
+//!         "</div>",
+//!     ),
+//! );
 //! ```
 //!
-//! Notice how the space inside and around the `<i>` tag is preserved, but the
+//! Note how the space inside and around the `<i>` tag is preserved, but the
 //! space around the `<div>` tag is stripped. Also notice how the multiple
 //! spaces inside the `<i>` are collapsed into a single space.
 
