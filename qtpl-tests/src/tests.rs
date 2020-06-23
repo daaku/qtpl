@@ -107,6 +107,7 @@ fn escape_attr() {
     fn t(v: &str) {
         tpl! { <a id={v}> }
     }
+    assert_eq!(render_string!(t("me")), r#"<a id="me">"#);
     assert_eq!(
         render_string!(t(XSS)),
         r#"<a id="You&#x27;re &lt;script&gt;alert(&quot;pawned&quot;)&lt;&#x2f;script&gt;!">"#,
