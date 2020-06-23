@@ -45,19 +45,6 @@ fn no_spaces_around_block() {
 }
 
 #[test]
-fn attrs() {
-    #[tplfn]
-    fn hello(class: &str) {
-        tpl! { <a class={!q class}>Hello!</a> }
-    }
-
-    assert_eq!(
-        render_string!(hello("world")),
-        "<a class=\"world\">Hello!</a>"
-    );
-}
-
-#[test]
 fn format_bytes() {
     #[tplfn]
     fn hello(name: &[u8]) {
