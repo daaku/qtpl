@@ -155,7 +155,7 @@
 //! fn home() {
 //!     tpl! {
 //!         <div>
-//!             <a>Go <i class="icon"> </i></a>
+//!             <a>Go <i class="icon">   </i></a>
 //!         </div>
 //!     }
 //! }
@@ -164,7 +164,8 @@
 //! ```
 //!
 //! Notice how the space inside and around the `<i>` tag is preserved, but the
-//! space around the `<div>` tag is stripped.
+//! space around the `<div>` tag is stripped. Also notice how the multiple
+//! spaces inside the `<i>` are collapsed into a single space.
 
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
