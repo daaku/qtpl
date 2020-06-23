@@ -183,6 +183,9 @@
 //! space around the `<div>` tag is stripped. Also notice how the multiple
 //! spaces inside the `<i>` are collapsed into a single space.
 
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/daaku/qtpl/master/assets/favicon.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/daaku/qtpl/master/assets/logo.png")]
+
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
 
