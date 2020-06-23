@@ -110,7 +110,7 @@
 //!
 //! ```
 //! # use qtpl::{tplfn, tpl, render_string};
-//!
+//! #
 //! type BoxError = Box<dyn std::error::Error + Send + Sync>;
 //!
 //! #[tplfn]
@@ -141,6 +141,30 @@
 //!   insignificant is stripped.
 //! * All whitespace, including newlines is collapsed into a single space.
 //! * Rules only apply to template text, contents of varibles are not modified.
+//!
+//! ## Tag Aware Whitespace
+//!
+//! This example shows an some of the important aspects of whitespace handling,
+//! including how certain tags behave differently, and how multiple spaces
+//! including newlines are collapsed:
+//!
+//! ```
+//! # use qtpl::{tplfn, tpl, render_string};
+//! #
+//! #[tplfn]
+//! fn home() {
+//!     tpl! {
+//!         <div>
+//!             <a>Go <i class="icon"> </i></a>
+//!         </div>
+//!     }
+//! }
+//!
+//! assert_eq!(render_string!(home()), r#"<div><a>Go <i class="icon"> </i></a></div>"#);
+//! ```
+//!
+//! Notice how the space inside and around the `<i>` tag is preserved, but the
+//! space around the `<div>` tag is stripped.
 
 pub use qtpl_macros::{child, render_string, tpl, tplfn};
 use std::io::{Result, Write};
