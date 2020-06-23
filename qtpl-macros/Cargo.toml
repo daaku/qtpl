@@ -1,6 +1,6 @@
 [package]
 name = "qtpl-macros"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Naitik Shah <n@daaku.org>"]
 edition = "2018"
 description = "Macro component of qtpl. Use qtpl instead of this package directly."
