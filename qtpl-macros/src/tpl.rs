@@ -78,7 +78,7 @@ impl From<Span> for SpanPos {
 }
 
 impl SpanPos {
-    fn move_end<T: Into<SpanPos>>(&mut self, end: T) {
+    fn move_end(&mut self, end: impl Into<SpanPos>) {
         self.end = end.into().end;
     }
 }
