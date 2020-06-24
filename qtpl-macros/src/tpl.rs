@@ -89,7 +89,6 @@ enum Braced {
     Content(syn::Expr),
     Bytes(syn::Expr),
     TplFn(syn::ExprCall),
-    Child(syn::ExprPath),
 }
 
 impl Parse for Braced {
@@ -101,7 +100,6 @@ impl Parse for Braced {
             match ms.as_str() {
                 "a" => Ok(Self::Attribute(input.parse()?)),
                 "b" => Ok(Self::Bytes(input.parse()?)),
-                "c" => Ok(Self::Child(input.parse()?)),
                 "t" => Ok(Self::TplFn(input.parse()?)),
                 _ => {
                     emit_error!(modifier.span(), "invalid formatting directive: {}", &ms);
@@ -120,7 +118,6 @@ impl ToTokens for Braced {
             Self::Default(_) => panic!("Default should have been transformed!"),
             Self::Attribute(b) => quote! { write!(w, "\"{}\"", ::qtpl::escape(#b))?; },
             Self::Bytes(b) => quote! { w.write_all(#b)?; },
-            Self::Child(b) => quote! { #b.render(w)?; },
             Self::Content(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
             Self::TplFn(b) => {
                 let mut c = b.clone();

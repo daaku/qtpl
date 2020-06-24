@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use qtpl::{child, render_string, tpl, tplfn};
+use qtpl::{render_string, tpl, tplfn};
 
 #[test]
 fn plain_text() {
@@ -103,15 +103,15 @@ fn escape_attr() {
 
 #[test]
 fn readme_example() {
-    use qtpl::{child, render_string, tpl, tplfn, Render};
+    use qtpl::{render, render_string, tpl, tplfn};
 
     #[tplfn]
-    fn page<B: Render, F: Render>(body: B, footer: F) {
+    fn page(body: &[u8], footer: &[u8]) {
         tpl! {
             <!doctype html>
             <body>
-                {!c body}
-                <footer>{!c footer}</footer>
+                {!b body}
+                <footer>{!b footer}</footer>
             </body>
         }
     }
@@ -128,10 +128,10 @@ fn readme_example() {
 
     #[tplfn]
     fn home(name: String, company: &str) {
-        let b = child!(body(name));
-        let f = child!(footer(company));
+        let b = render!(body(name));
+        let f = render!(footer(company));
         tpl! {
-            {!t page(b, f)}
+            {!t page(&b, &f)}
         }
     }
 

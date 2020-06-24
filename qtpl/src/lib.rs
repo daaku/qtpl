@@ -186,25 +186,8 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/daaku/qtpl/master/assets/favicon.png")]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/daaku/qtpl/master/assets/logo.png")]
 
-pub use qtpl_macros::{child, render_string, tpl, tplfn};
-use std::io::{Result, Write};
+pub use qtpl_macros::{render, render_string, tpl, tplfn};
 
 // This is used internally for escaping in macro output.
 #[doc(hidden)]
 pub use v_htmlescape::escape;
-
-// This is used internally for closures created by child components and is
-// automatically implemented by them.
-#[doc(hidden)]
-pub trait Render {
-    fn render(self, destination: &mut dyn Write) -> Result<()>;
-}
-
-impl<F> Render for F
-where
-    F: FnOnce(&mut dyn Write) -> Result<()>,
-{
-    fn render(self, destination: &mut dyn Write) -> Result<()> {
-        self(destination)
-    }
-}

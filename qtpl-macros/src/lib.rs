@@ -45,13 +45,15 @@ pub fn tplfn(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 #[proc_macro_error]
-pub fn child(input: TokenStream) -> TokenStream {
+pub fn render(input: TokenStream) -> TokenStream {
     let mut c = parse_macro_input!(input as syn::ExprCall);
-    let arg: syn::Expr = syn::parse_quote!(w);
+    let arg: syn::Expr = syn::parse_quote!(&mut w);
     c.args.insert(0, arg);
     TokenStream::from(quote! {
-        |w: &mut dyn ::std::io::Write| -> ::std::io::Result<()> {
-            #c
+        {
+            let mut w = vec![];
+            #c?;
+            w
         }
     })
 }
