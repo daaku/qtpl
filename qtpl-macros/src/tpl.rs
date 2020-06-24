@@ -118,16 +118,16 @@ impl ToTokens for Braced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             Self::Default(_) => panic!("Default should have been transformed!"),
-            Self::Content(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
             Self::Attribute(b) => quote! { write!(w, "\"{}\"", ::qtpl::escape(#b))?; },
             Self::Bytes(b) => quote! { w.write_all(#b)?; },
+            Self::Child(b) => quote! { #b.render(w)?; },
+            Self::Content(b) => quote! { write!(w, "{}", ::qtpl::escape(#b))?; },
             Self::TplFn(b) => {
                 let mut c = b.clone();
                 let arg: syn::Expr = syn::parse_quote!(w);
                 c.args.insert(0, arg);
                 quote! { #c?; }
             }
-            Self::Child(b) => quote! { #b.render(w)?; },
         }
         .to_tokens(tokens);
     }
